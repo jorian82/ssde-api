@@ -33,26 +33,19 @@ db.sequelize = sequelize;
 //DB table definition
 db.users = require('./model.user')(sequelize, Sequelize);
 db.roles = require('./model.role')(sequelize, Sequelize);
-// db.usersroles = require('./model.user-role')(sequelize, Sequelize);
-db.documents = require('./model.document')(sequelize, Sequelize);
-db.comments = require('./model.comment')(sequelize, Sequelize);
-db.documentscomments = require('./model.document-comment')(sequelize, Sequelize);
-db.categories = require('./model.category')(sequelize, Sequelize);
-db.documentscategories = require('./model.document-category')(sequelize, Sequelize);
-db.companies = require('./model.company')(sequelize, Sequelize);
 db.refreshToken = require('./model.refreshToken')(sequelize, Sequelize);
 
 // DB tables relationships
-db.documents.hasMany(db.comments, {as: 'comments'});
-db.documents.hasMany(db.categories, {as: 'categories'});
-db.comments.belongsTo(db.documents, {
-    foreignKey: 'documentId', 
-    as: 'document'
-});
-db.categories.belongsTo(db.documents, {
-    foreignKey: 'documentId',
-    as: 'document'
-});
+// db.documents.hasMany(db.comments, {as: 'comments'});
+// db.documents.hasMany(db.categories, {as: 'categories'});
+// db.comments.belongsTo(db.documents, {
+//     foreignKey: 'documentId',
+//     as: 'document'
+// });
+// db.categories.belongsTo(db.documents, {
+//     foreignKey: 'documentId',
+//     as: 'document'
+// });
 db.roles.belongsToMany(db.users, {
     through: 'users_roles',
     foreignKey: 'roleId',

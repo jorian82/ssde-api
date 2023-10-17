@@ -1,4 +1,4 @@
 module.exports = {
     dialect: "sqlite",
-    storage: "./databases/docman.db"
+    storage: "./databases/ssde-api.db"
   };
