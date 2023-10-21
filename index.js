@@ -30,7 +30,7 @@ db.sequelize.sync({ force: true})
 
 // simple route
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to doc-manager application backend" });
+  res.json({ message: "Welcome to ssde blogs api" });
 });
 
 // app.get('/api', (req, res) => {
