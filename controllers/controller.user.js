@@ -1,6 +1,6 @@
 const db = require('../models');
 const User = db.users;
-const Op = db.Sequelize.Op;
+// const Op = db.Sequelize.Op;
 
 exports.create = (req, res) => {};
 exports.findAll = (req, res) => {};
@@ -23,20 +23,19 @@ exports.creatorBoard = (req, res) => {
     res.status(200).send("Creator Content.");
 };
 exports.getProfile = (req, res) => {
-    User.findOne({
-        where: {
-          username: req.body.username
-        }
-    })
+    db.connect();
+    User.findOne({ "username": req.body.username })
     .then( async ( user ) => {
         if (!user) {
+            db.close();
             return res.status(404).send({ message: "User Not found." });
         }
         let authorities = [];
-        user.getRoles().then(roles => {
+        user.populate('role').then(roles => {
             for (let i = 0; i < roles.length; i++) {
                 authorities.push("ROLE_" + roles[i].name.toUpperCase());
             }
+            db.close();
             res.status(200).send({
                 id: user.id,
                 username: user.username,
@@ -47,6 +46,7 @@ exports.getProfile = (req, res) => {
         });        
     })
     .catch ( error => {
+        db.close();
         res.status(500).send({ message: error.message });
     });
 }

@@ -1,70 +1,53 @@
-
-// SQLite configuration
-const dbConfig = require("../config/db.config.sqlite");
-const Sequelize = require("sequelize");
-
-const sequelize = new Sequelize({
-    dialect: dbConfig.dialect,
-    storage: dbConfig.storage
-});
-
-// MySQL configuration
-/*
-const dbConfig = require("../config/db.config.mysql");
-const Sequelize = require("sequelize");
-
-const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD ,{
-    host: dbConfig.HOST,
-    dialect: dbConfig.dialect,
-    operatorsAliases: false,
-    pool: {
-        max: dbConfig.pool.max,
-        min: dbConfig.pool.min,
-        acquire: dbConfig.pool.acquire,
-        idle: dbConfig.pool.idle
-    }
-});
-*/
-
 const db = {};
-db.Sequelize = Sequelize;
-db.sequelize = sequelize;
+const mongoose = require('mongoose');
+
+// MongoDB configuration
+const dbConfig = require('../config/db.config.mongodb');
+const uri = `mongodb+srv://${dbConfig.username}:${dbConfig.password}@${dbConfig.cluster}`;
+const database = 'ssde-blogs'; // REPLACE WITH YOUR DB NAME
+// const chalk = require('chalk');
+const chalk = require('chalk');
+
+const connected = chalk.bold.cyan;
+const error = chalk.bold.yellow;
+const disconnected = chalk.bold.red;
+const termination = chalk.bold.magenta;
 
 //DB table definition
-db.users = require('./model.user')(sequelize, Sequelize);
-db.roles = require('./model.role')(sequelize, Sequelize);
-db.refreshToken = require('./model.refreshToken')(sequelize, Sequelize);
+db.mongoose = mongoose
+db.users = require('./model.user')(mongoose);
+db.roles = require('./model.role')(mongoose);
+db.posts = require('./model.post')(mongoose);
+db.comments = require('./model.comment')(mongoose);
+db.token = require('./model.refreshToken')(mongoose);
 
 // DB tables relationships
-// db.documents.hasMany(db.comments, {as: 'comments'});
-// db.documents.hasMany(db.categories, {as: 'categories'});
-// db.comments.belongsTo(db.documents, {
-//     foreignKey: 'documentId',
-//     as: 'document'
-// });
-// db.categories.belongsTo(db.documents, {
-//     foreignKey: 'documentId',
-//     as: 'document'
-// });
-db.roles.belongsToMany(db.users, {
-    through: 'users_roles',
-    foreignKey: 'roleId',
-    otherKey: 'userId'
-});
-db.users.belongsToMany(db.roles, {
-    through: 'users_roles',
-    foreignKey: 'userId',
-    otherKey: 'roleId'
-});
-db.refreshToken.belongsTo(db.users, {
-    foreignKey: 'userId', 
-    targetKey: 'id'
-})
-db.users.hasOne(db.refreshToken, {
-    foreignKey: 'userId',
-    targetKey: 'id'
-})
 db.ROLES = ['user','admin','creator'];
 
-//DB object export
+db.connect = () => {
+    db.mongoose.connect(`${uri}/${database}`);
+
+    db.mongoose.connection.on('connected', () => {
+        console.log(connected("Mongoose default connection is open to ", dbConfig.cluster));
+    });
+
+    db.mongoose.connection.on('error', (err) => {
+        console.log(error("Mongoose default connection has occured "+err+" error"));
+    });
+
+    db.mongoose.connection.on('disconnected', () => {
+        console.log(disconnected("Mongoose default connection is disconnected"));
+    });
+
+    process.on('SIGINT', () => {
+        console.log(termination("Mongoose default connection is disconnected due to application termination"));
+        db.mongoose.connection.close();
+        process.exit(0)
+    });
+}
+
+db.close = () => {
+    db.mongoose.connection.close();
+}
+
 module.exports = db;

@@ -1,8 +1,11 @@
 const db = require('../models');
 const Role = db.roles;
-const Op = db.Sequelize.Op;
+// const Op = db.Sequelize.Op;
 
-exports.create = (req, res) => {};
+exports.create = (req, res) => {
+
+    console.log('role created')
+};
 exports.findAll = (req, res) => {};
 exports.findOne = (req, res) => {};
 exports.update = (req, res) => {};

@@ -3,7 +3,7 @@ const config = require("../config/auth.config");
 const User = db.users;
 const Role = db.roles;
 const RefreshToken = db.refreshToken;
-const Op = db.Sequelize.Op;
+// const Op = db.Sequelize.Op;
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 
@@ -41,11 +41,8 @@ exports.signup = (req, res) => {
 
 exports.signin = (req, res) => {
   console.log('request body: ',req.body);
-  User.findOne({
-    where: {
-      username: req.body.username
-    }
-  })
+  db.connect();
+  User.findOne({ "username": req.body.username })
     .then( async (user) => {
         if (!user) {
             return res.status(404).send({ message: "User Not found." });
