@@ -97,7 +97,7 @@ async function initialize() {
     console.log('Error initializing the default users', err);
     // db.close();
   } finally {
-    db.close();
+    // db.close();
   }
 }
 
