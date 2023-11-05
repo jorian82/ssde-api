@@ -14,7 +14,7 @@ router.use(function(req, res, next) {
 router.post(
     '/post/user',
     [authJwt.verifyToken, authJwt.isCreatorOrAdmin],
-    controller.postsByUser
+    controller.findByUser
 );
 
 router.get(
@@ -31,10 +31,12 @@ router.post(
 router.post(
     '/post/comment',
     [authJwt.verifyToken],
-    controller.commentCreate
+    controller.createComment
 )
 
 router.get(
     '/post/:id',
     controller.findById
 )
+
+module.exports = router;
