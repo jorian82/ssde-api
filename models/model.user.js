@@ -63,9 +63,9 @@ module.exports = mongoose => {
         return this.firstName + ' ' + this.lastName;
     });
 
-    userSchema.methods.getInitials = function () {
+    userSchema.method("getInitials", () => {
         return this.firstName[0] + this.lastName[0];
-    };
+    });
 
     userSchema.pre('save', function (next) {
         let now = Date.now();
@@ -80,11 +80,11 @@ module.exports = mongoose => {
         next();
     });
 
-    userSchema.method("toJSON", () => {
-        const { __v, _id, ...object } = this.toObject();
-        object.id = _id;
-        return object;
-    });
+    // userSchema.method("toJSON", () => {
+    //     const { __v, _id, ...object } = this.toObject();
+    //     object.id = _id;
+    //     return object;
+    // });
 
     return mongoose.model("User", userSchema);
 }

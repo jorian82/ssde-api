@@ -2,6 +2,8 @@ const config = require("../config/auth.config");
 const { v4: uuidv4 } = require("uuid");
 
 module.exports = mongoose => {
+    let tokenFactory = {};
+
     const refreshTokenSchema = new mongoose.Schema({
         token: String,
         userId: {
@@ -11,12 +13,13 @@ module.exports = mongoose => {
         expiryDate: Date
     });
 
-    refreshTokenSchema.createToken = (user) => {
+    tokenFactory.dbModel = new mongoose.model("refreshToken", refreshTokenSchema);
+
+    tokenFactory.createToken = (user) => {
         let expiredAt = new Date();
         expiredAt.setSeconds(expiredAt.getSeconds() + config.jwtRefreshExpiration);
         let _token = uuidv4();
-        // return refreshTokenlet refreshToken = await this.create({
-        return this.create({
+        return tokenFactory.dbModel.create({
             token: _token,
             userId: user,
             expiryDate: expiredAt.getTime(),
@@ -25,16 +28,18 @@ module.exports = mongoose => {
         });
     };
 
-    refreshTokenSchema.verifyExpiration = (token) => {
+    tokenFactory.verifyExpiration = (token) => {
+        console.log('token: ', token);
         let expiryDate = new Date(token.expiryDate);
+        console.log('Expiration date: ', expiryDate);
         return expiryDate.getTime() < new Date().getTime();
     };
 
-    refreshTokenSchema.method("toJSON", () => {
+    tokenFactory.toJSON = () => {
         const { __v, _id, ...object } = this.toObject();
         object.id = _id;
         return object;
-    });
+    };
 
-    return new mongoose.model("refreshToken", refreshTokenSchema);
+    return tokenFactory;
 }

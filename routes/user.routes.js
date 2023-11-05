@@ -36,11 +36,17 @@ const router = express.Router();
         controller.adminBoard
     );
 
-    router.get(
+    router.post(
         '/user/profile',
         [authJwt.verifyToken],
         controller.getProfile
     );
+
+    router.get(
+        '/user/all',
+        [authJwt.verifyToken, authJwt.isAdmin],
+        controller.findAll
+    )
 
     // console.log('app in user routes file: ',app);
 

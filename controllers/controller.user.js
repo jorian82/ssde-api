@@ -3,7 +3,21 @@ const User = db.users;
 // const Op = db.Sequelize.Op;
 
 exports.create = (req, res) => {};
-exports.findAll = (req, res) => {};
+exports.findAll = (req, res) => {
+    User.find({}).populate('roles')
+        .then( users => {
+            res.status(200).send({
+                message: "success",
+                data: users
+            });
+        })
+        .catch(error => {
+            res.status(500).send({
+                message: "Error getting users",
+                error: error
+            });
+        });
+};
 exports.findOne = (req, res) => {};
 exports.update = (req, res) => {};
 exports.delete = (req, res) => {};
@@ -23,30 +37,24 @@ exports.creatorBoard = (req, res) => {
     res.status(200).send("Creator Content.");
 };
 exports.getProfile = (req, res) => {
-    db.connect();
-    User.findOne({ "username": req.body.username })
+    User.findOne({ "username": req.body.username }).populate('roles')
     .then( async ( user ) => {
         if (!user) {
-            db.close();
             return res.status(404).send({ message: "User Not found." });
         }
         let authorities = [];
-        user.populate('role').then(roles => {
-            for (let i = 0; i < roles.length; i++) {
-                authorities.push("ROLE_" + roles[i].name.toUpperCase());
-            }
-            db.close();
-            res.status(200).send({
-                id: user.id,
-                username: user.username,
-                fullName: user.firstName + ' ' + user.lastName,
-                email: user.email,
-                roles: authorities,
-            });
-        });        
+        user.roles.forEach(role => {
+            authorities.push(role.name);
+        });
+        res.status(200).send({
+            id: user.id,
+            username: user.username,
+            fullName: user.firstName + ' ' + user.lastName,
+            email: user.email,
+            roles: authorities,
+        });
     })
     .catch ( error => {
-        db.close();
         res.status(500).send({ message: error.message });
     });
 }

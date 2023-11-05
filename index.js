@@ -70,8 +70,6 @@ async function initialize() {
       });
       userOne.roles.push(admin);
       await userOne.save();
-      // .then( user => { user.setRoles([3]); })
-      // .catch( err => { console.log('error adding user: ',err); });
       let userTwo = await Users.create({
         username: 'leandro',
         firstName: 'Leandro',
@@ -81,8 +79,6 @@ async function initialize() {
       });
       userTwo.roles.push(creator);
       await userTwo.save();
-      // .then( user => { user.setRoles([2]); })
-      // .catch( err => { console.log('error adding user: ',err); });
       let userThree = await Users.create({
         username: 'user3',
         firstName: 'Dummy',
@@ -95,9 +91,7 @@ async function initialize() {
 
   } catch (err) {
     console.log('Error initializing the default users', err);
-    // db.close();
   } finally {
-    db.close();
   }
 }
 

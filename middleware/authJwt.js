@@ -30,58 +30,35 @@ verifyToken = (req, res, next) => {
   });
 };
 
-isAdmin = (req, res, next) => {
-  User.findByPk(req.userId).then(user => {
-    console.log('user: ',user);
-    user.getRoles().then(roles => {
-      for (let i = 0; i < roles.length; i++) {
-        if (roles[i].name === "admin") {
-          next();
-          return;
-        }
-      }
-      res.status(403).send({
-        message: "Require Admin Role!"
+hasRole = (req, res, next, ...roleList) => {
+  User.findById(req.userId).populate('roles')
+      .then( user => {
+        user.roles.forEach(role => {
+          roleList.forEach( item => {
+            if (role.name === item) {
+              next();
+            }
+          });
+        });
+      })
+      .catch( error => {
+        console.log("error: ",error);
+        res.status(403).send({
+          message: `Require ${roleList} Role!`
+        });
       });
-      return;
-    });
-  });
+}
+
+isAdmin = (req, res, next) => {
+  hasRole(req, res, next, "admin");
 };
 
 isCreator = (req, res, next) => {
-  User.findByPk(req.userId).then(user => {
-    user.getRoles().then(roles => {
-      for (let i = 0; i < roles.length; i++) {
-        if (roles[i].name === "creator") {
-          next();
-          return;
-        }
-      }
-      res.status(403).send({
-        message: "Require Creator Role!"
-      });
-    });
-  });
+  hasRole(req, res, next, "creator");
 };
 
 isCreatorOrAdmin = (req, res, next) => {
-  User.findByPk(req.userId).then(user => {
-    user.getRoles().then(roles => {
-      for (let i = 0; i < roles.length; i++) {
-        if (roles[i].name === "creator") {
-          next();
-          return;
-        }
-        if (roles[i].name === "admin") {
-          next();
-          return;
-        }
-      }
-      res.status(403).send({
-        message: "Require Creator or Admin Role!"
-      });
-    });
-  });
+  hasRole(req,res,next,"admin","creator");
 };
 
 const authJwt = {

@@ -13,11 +13,11 @@ module.exports = mongoose => {
         }
     });
 
-    roleSchema.method("toJSON", () => {
-        const { __v, _id, ...object } = this.toObject();
-        object.id = _id;
-        return object;
-    });
+    // roleSchema.method("toJSON", () => {
+    //     const { __v, _id, ...object } = this.toObject();
+    //     object.id = _id;
+    //     return object;
+    // });
 
     return mongoose.model('Role', roleSchema);
 }

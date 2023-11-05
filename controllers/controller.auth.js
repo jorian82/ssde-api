@@ -2,12 +2,25 @@ const db = require("../models");
 const config = require("../config/auth.config");
 const User = db.users;
 const Role = db.roles;
-const RefreshToken = db.refreshToken;
+const RefreshToken = db.token;
 // const Op = db.Sequelize.Op;
-var jwt = require("jsonwebtoken");
-var bcrypt = require("bcryptjs");
+let jwt = require("jsonwebtoken");
+let bcrypt = require("bcryptjs");
 
-exports.signup = (req, res) => {
+let authentication = {};
+
+addRole = (req, res, user, ...roleName) => {
+    roleName.forEach( item => {
+        Role.findOne({ "name": roleName })
+            .then( role => {
+                user.roles.push(role);
+                user.save();
+                res.send({ message: "User was registered successfully!" });
+            });
+    });
+}
+
+authentication.signup = (req, res) => {
   // Save User to Database
   User.create({
     username: req.body.username,
@@ -16,22 +29,9 @@ exports.signup = (req, res) => {
   })
     .then(user => {
       if (req.body.roles) {
-        Role.findAll({
-          where: {
-            name: {
-              [Op.or]: req.body.roles
-            }
-          }
-        }).then(roles => {
-          user.setRoles(roles).then(() => {
-            res.send({ message: "User was registered successfully!" });
-          });
-        });
+          addRole(res, user, req.body.roles);
       } else {
-        // user role = 1
-        user.setRoles([1]).then(() => {
-          res.send({ message: "User was registered successfully!" });
-        });
+          addRole(res, user, "user");
       }
     })
     .catch(err => {
@@ -39,10 +39,8 @@ exports.signup = (req, res) => {
     });
 };
 
-exports.signin = (req, res) => {
-  console.log('request body: ',req.body);
-  db.connect();
-  User.findOne({ "username": req.body.username })
+authentication.signin = (req, res) => {
+  User.findOne({ "username": req.body.username }).populate('roles')
     .then( async (user) => {
         if (!user) {
             return res.status(404).send({ message: "User Not found." });
@@ -63,18 +61,16 @@ exports.signin = (req, res) => {
         });
         let refreshToken = await RefreshToken.createToken(user);
         let authorities = [];
-        user.getRoles().then(roles => {
-            for (let i = 0; i < roles.length; i++) {
-            authorities.push("ROLE_" + roles[i].name.toUpperCase());
-            }
-            res.status(200).send({
+        user.roles.forEach(role => {
+            authorities.push(role.name.toUpperCase());
+        });
+        res.status(200).send({
             id: user.id,
             username: user.username,
             email: user.email,
             roles: authorities,
             accessToken: token,
             refreshToken: refreshToken
-            });
         });
     })
     .catch(err => {
@@ -82,20 +78,20 @@ exports.signin = (req, res) => {
     });
 };
 
-exports.refreshToken = async (req, res) => {
+authentication.refreshToken = async (req, res) => {
   const { refreshToken: requestToken } = req.body;
   if (requestToken == null) {
     return res.status(403).json({ message: "Refresh Token is required!" });
   }
   try {
-    let refreshToken = await RefreshToken.findOne({ where: { token: requestToken } });
+    let refreshToken = await RefreshToken.findOne( {"token": requestToken });
     // console.log(refreshToken)
     if (!refreshToken) {
       res.status(403).json({ message: "Refresh token is not in database!" });
       return;
     }
     if (RefreshToken.verifyExpiration(refreshToken)) {
-      RefreshToken.destroy({ where: { id: refreshToken.id } });
+      RefreshToken.deleteOne({ "_id": refreshToken._id });
       
       res.status(403).json({
         message: "Refresh token was expired. Please make a new signin request",
@@ -115,6 +111,8 @@ exports.refreshToken = async (req, res) => {
   }
 };
 
-exports.baseURL = async (req, res) => {
+authentication.baseURL = async (req, res) => {
   res.status(200).send("authentication routes");
 }
+
+module.exports = authentication
