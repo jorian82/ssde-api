@@ -1,5 +1,6 @@
 const db = require('../models');
 const User = db.users;
+const Tokens = db.token;
 
 exports.create = (req, res) => {};
 exports.findAll = (req, res) => {
@@ -24,16 +25,28 @@ exports.deleteAll = (req, res) => {};
 exports.findAllPublished = (req, res) => {};
 
 exports.allAccess = (req, res) => {
-    res.status(200).send("Public Content.");
+    res.status(200).send({
+        "message": "success",
+        "data":"Public Content."
+    });
 };
 exports.userBoard = (req, res) => {
-    res.status(200).send("User Content.");
+    res.status(200).send({
+        "message": "success",
+        "data": "User Content."
+    });
 };
 exports.adminBoard = (req, res) => {
-    res.status(200).send("Admin Content.");
+    res.status(200).send({
+        "message": "success",
+        "data":"Admin Content."
+    });
 };
 exports.creatorBoard = (req, res) => {
-    res.status(200).send("Creator Content.");
+    res.status(200).send({
+        "message": "success",
+        "data": "Creator Content."
+    });
 };
 exports.getProfile = (req, res) => {
     User.findOne({ "username": req.body.username }).populate('roles')
@@ -56,4 +69,7 @@ exports.getProfile = (req, res) => {
     .catch ( error => {
         res.status(500).send({ message: error.message });
     });
+;}
+
+exports.signout = (req, res) => {
 }

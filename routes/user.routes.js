@@ -48,6 +48,12 @@ const router = express.Router();
         controller.findAll
     )
 
+    router.post(
+        '/user/signout',
+        [authJwt.verifyToken],
+        controller.signout
+    )
+
     // console.log('app in user routes file: ',app);
 
     module.exports = router;

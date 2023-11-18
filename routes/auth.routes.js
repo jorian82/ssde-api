@@ -2,6 +2,7 @@ const { verifySignUp } = require("../middleware");
 const controller = require("../controllers/controller.auth");
 const express = require('express');
 const router = express.Router();
+const { authJwt } = require("../middleware");
 
 // module.exports = function(app) {
 
@@ -23,7 +24,9 @@ const router = express.Router();
         controller.signup
     );
     router.post('/auth/signin', controller.signin);
-    router.post('/signauth/refreshtoken', controller.refreshToken);
+    router.post('/auth/refreshtoken', controller.refreshToken);
+
+    router.post('/auth/signout', [authJwt.verifyToken], controller.signout );
 
     // console.log('app in auth routes file: ',app);
     module.exports = router;

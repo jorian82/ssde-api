@@ -2,6 +2,7 @@ const db = require("../models");
 const config = require("../config/auth.config");
 const User = db.users;
 const Role = db.roles;
+const Tokens = db.token.dbModel;
 const RefreshToken = db.token;
 // const Op = db.Sequelize.Op;
 let jwt = require("jsonwebtoken");
@@ -40,6 +41,7 @@ authentication.signup = (req, res) => {
 };
 
 authentication.signin = (req, res) => {
+    console.log('signing in: ',req.body);
   User.findOne({ "username": req.body.username }).populate('roles')
     .then( async (user) => {
         if (!user) {
@@ -113,6 +115,31 @@ authentication.refreshToken = async (req, res) => {
 
 authentication.baseURL = async (req, res) => {
   res.status(200).send("authentication routes");
+}
+
+authentication.signout = async (req, res) => {
+    const username = req.body.username;
+    // console.log('logout request executing...', userId);
+    Tokens.find({}).populate('userId')
+        .then( async (tokens) => {
+            console.log('records found: ', tokens.length);
+            tokens.forEach( item => {
+                if(item.userId.username == username) {
+                    Tokens.deleteOne({"token": item.token})
+                        .then(deleted => {})
+                        .catch(error => {});
+                }
+            });
+            res.status(200).send({
+                message: "success"
+            });
+        })
+        .catch( error => {
+            res.status(500).send({
+                message: "error",
+                error: error
+            });
+        })
 }
 
 module.exports = authentication
