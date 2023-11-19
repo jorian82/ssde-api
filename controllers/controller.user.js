@@ -56,7 +56,7 @@ exports.getProfile = (req, res) => {
         }
         let authorities = [];
         user.roles.forEach(role => {
-            authorities.push(role.name);
+            authorities.push({name: role.name.toUpperCase(), id: role.id});
         });
         res.status(200).send({
             id: user.id,
