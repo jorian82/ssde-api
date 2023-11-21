@@ -39,4 +39,9 @@ router.get(
     controller.findById
 )
 
+router.delete(
+    '/post/deleteAll',
+    [authJwt.verifyToken, authJwt.isAdmin],
+)
+
 module.exports = router;
