@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require('path');
 const app = express();
-var bcrypt = require("bcryptjs");
+let bcrypt = require("bcryptjs");
 
 const corsOptions = {
   origin: "http://localhost:4200"
